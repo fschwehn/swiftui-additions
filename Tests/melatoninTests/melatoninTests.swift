@@ -6,6 +6,6 @@ final class melatoninTests: XCTestCase {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct
         // results.
-        XCTAssertEqual(melatonin().text, "Hello, World!")
+        XCTAssertEqual(23, 23)
     }
 }
