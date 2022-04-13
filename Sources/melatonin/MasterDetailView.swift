@@ -4,17 +4,41 @@ import SwiftUI
 
 public struct MasterDetailView<Item, ItemLabel, DetailView>: View where Item: Identifiable, ItemLabel: View, DetailView: View {
     
-    public var items: [Item]
+    var items: [Item]
     
-    @Binding public var selection: Item.ID?
+    @Binding var selection: Item.ID?
     
-    public var itemLabel: (Item) -> ItemLabel
-    public var addItem: (() -> Item.ID)? = nil
-    public var removeItem: ((Item.ID) -> Void)? = nil
-    public var moveItems: ((IndexSet, Int) -> Void)? = nil
-    public var detailView: (Item) -> DetailView
+    var minListWidth: CGFloat?
+    var maxListWidth: CGFloat?
+    var addItem: (() -> Item.ID)? = nil
+    var removeItem: ((_ id: Item.ID) -> Void)? = nil
+    var moveItems: ((_ from: IndexSet, _ to: Int) -> Void)? = nil
+    var itemLabel: (_ item: Item, _ isActive: Bool) -> ItemLabel
+    var detailView: (_ item: Item) -> DetailView
     
     @StateObject private var renderPassCounter = RenderPassCounter()
+    
+    public init(
+        items: [Item],
+        selection: Binding<Item.ID?>,
+        minListWidth: CGFloat? = nil,
+        maxListWidth: CGFloat? = nil,
+        addItem: (() -> Item.ID)? = nil,
+        removeItem: ((_ id: Item.ID) -> Void)? = nil,
+        moveItems: ((_ from: IndexSet, _ to: Int) -> Void)? = nil,
+        itemLabel: @escaping (_ item: Item, _ isActive: Bool) -> ItemLabel,
+        detailView: @escaping (_ item: Item) -> DetailView
+    ) {
+        self.items = items
+        self._selection = selection
+        self.itemLabel = itemLabel
+        self.addItem = addItem
+        self.removeItem = removeItem
+        self.moveItems = moveItems
+        self.minListWidth = minListWidth
+        self.maxListWidth = maxListWidth
+        self.detailView = detailView
+    }
     
     public var body: some View {
         renderPassCounter.value += 1
@@ -27,6 +51,8 @@ public struct MasterDetailView<Item, ItemLabel, DetailView>: View where Item: Id
                 else {
                     List(content: listContent)
                         .listStyle(SidebarListStyle())
+                        .foregroundColor(.primary)
+                        .frame(minWidth: minListWidth, maxWidth: maxListWidth)
                 }
                 
                 buttonBox()
@@ -59,6 +85,7 @@ private extension MasterDetailView {
     
     func navigationLink(for item: Item) -> some View {
         let renderPass = renderPassCounter.value
+        let isActive = item.id == selection
         
         return NavigationLink(
             destination: VStack {
@@ -71,7 +98,7 @@ private extension MasterDetailView {
                 }
             },
             isActive: Binding(get: {
-                item.id == selection
+                isActive
             }, set: { active in
                 if active {
                     selection = item.id
@@ -85,7 +112,7 @@ private extension MasterDetailView {
                 }
             }),
             label: {
-                itemLabel(item)
+                itemLabel(item, isActive)
             })
     }
     
@@ -101,20 +128,30 @@ private extension MasterDetailView {
         }
     }
     
+    @ViewBuilder
     func buttonBox() -> some View {
-        HStack(alignment: .firstTextBaseline) {
-            Spacer()
-            Button(action: addButtonAction, label: {
-                ToolButtonLabel(imageName: "plus")
-            })
-            Button(action: removeButtonAction, label: {
-                ToolButtonLabel(imageName: "minus")
-            })
-            .disabled(selection == nil)
+        let showAddButton = addItem != nil
+        let showRemoveButton = removeItem != nil
+        
+        if showAddButton || showRemoveButton {
+            HStack(alignment: .firstTextBaseline) {
+                Spacer()
+                if showAddButton {
+                    Button(action: addButtonAction, label: {
+                        ToolButtonLabel(imageName: "plus")
+                    })
+                }
+                if showRemoveButton {
+                    Button(action: removeButtonAction, label: {
+                        ToolButtonLabel(imageName: "minus")
+                    })
+                    .disabled(selection == nil)
+                }
+            }
+            .font(.system(size: 14, weight: Font.Weight.semibold, design: .default))
+            .buttonStyle(PlainButtonStyle())
+            .fixedSize(horizontal: false, vertical: true)
         }
-        .font(.system(size: 14, weight: Font.Weight.semibold, design: .default))
-        .buttonStyle(PlainButtonStyle())
-        .fixedSize(horizontal: false, vertical: true)
     }
     
     func addButtonAction() {
@@ -155,20 +192,17 @@ struct MasterDetailView_Previews: PreviewProvider {
         .init(name: "Three"),
     ]
     
-    static func itemLabel(_ item: Item) -> some View {
-        Text(item.name)
-    }
-    
     static var previews: some View {
         MasterDetailView(
             items: items,
             selection: .constant(items[1].id),
-            itemLabel: itemLabel,
-            addItem: nil,
-            removeItem: nil
-        ) { item in
-            Text(item.name)
-        }
+            minListWidth: 200,
+            maxListWidth: 300) { item, isActive in
+                Text(item.name)
+                    .font(isActive ? .title2 : .title3)
+            } detailView: { item in
+                Text(item.name)
+            }
     }
 }
 #endif
