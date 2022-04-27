@@ -1,8 +1,8 @@
 import SwiftUI
 
-public struct FormView<Content>: View where Content : View {
+public struct HFormView<Content>: View where Content : View {
     private var content: () -> Content
-    private var configuration: FormViewConfiguration
+    private var configuration: HFormViewConfiguration
     
     public init(
         rowSpacing: CGFloat? = 8,
@@ -34,13 +34,13 @@ public struct FormView<Content>: View where Content : View {
     }
 }
 
-public struct FormRow<Label, Value>: View where Label: View, Value: View {
+public struct HFormRow<Label, Value>: View where Label: View, Value: View {
     private var alignment: VerticalAlignment
     private var label: () -> Label
     private var value: () -> Value
     
     @Environment(\.formViewConfiguration)
-    private var configuration: FormViewConfiguration
+    private var configuration: HFormViewConfiguration
     
     public init(
         alignment: VerticalAlignment = .firstTextBaseline,
@@ -71,19 +71,7 @@ public struct FormRow<Label, Value>: View where Label: View, Value: View {
     }
 }
 
-extension View {
-    @ViewBuilder
-    func labelsHidden(_ hidden: Bool) -> some View {
-        if hidden {
-            self.labelsHidden()
-        }
-        else {
-            self
-        }
-    }
-}
-
-public extension FormRow where Label == Text {
+public extension HFormRow where Label == Text {
     init(
         _ label: String,
         alignment: VerticalAlignment = .firstTextBaseline,
@@ -95,7 +83,7 @@ public extension FormRow where Label == Text {
     }
 }
 
-fileprivate struct FormViewConfiguration {
+fileprivate struct HFormViewConfiguration {
     struct Label {
         var maxWidth: CGFloat?
     }
@@ -110,17 +98,17 @@ fileprivate struct FormViewConfiguration {
     var value: Value
 }
 
-fileprivate struct FormViewConfigurationKey: EnvironmentKey {
-    static let defaultValue = FormViewConfiguration(
+fileprivate struct HFormViewConfigurationKey: EnvironmentKey {
+    static let defaultValue = HFormViewConfiguration(
         label: .init(),
         value: .init()
     )
 }
 
 fileprivate extension EnvironmentValues {
-    var formViewConfiguration: FormViewConfiguration {
-        get { self[FormViewConfigurationKey.self] }
-        set { self[FormViewConfigurationKey.self] = newValue }
+    var formViewConfiguration: HFormViewConfiguration {
+        get { self[HFormViewConfigurationKey.self] }
+        set { self[HFormViewConfigurationKey.self] = newValue }
     }
 }
 
@@ -135,18 +123,18 @@ fileprivate extension HorizontalAlignment {
 }
 
 #if DEBUG
-struct FormView_Previews: PreviewProvider {
+struct HFormView_Previews: PreviewProvider {
     static var previews: some View {
-        FormView(
+        HFormView(
             rowSpacing: 8,
             maxLabelWidth: 140,
             maxValueWidth: 200
         ) {
-            FormRow("Label One") {
+            HFormRow("Label One") {
                 TextField("value", text: .constant(""))
             }
             
-            FormRow("Label Two") {
+            HFormRow("Label Two") {
                 Picker(selection: .constant(1)) {
                     ForEach(1 ... 3, id: \.self) { i in
                         Text("Item \(i)")
@@ -156,7 +144,7 @@ struct FormView_Previews: PreviewProvider {
                     .pickerStyle(.radioGroup)
             }
             
-            FormRow {
+            HFormRow {
                 HStack {
                     Image(systemName: "exclamationmark.triangle")
                     Text("Custom Label")
@@ -166,15 +154,15 @@ struct FormView_Previews: PreviewProvider {
                 TextField("value", text: .constant(""))
             }
          
-            FormRow("Toggle", alignment: .center) {
+            HFormRow("Toggle", alignment: .center) {
                 Toggle(isOn: .constant(true), label: EmptyView.init)
             }
             
-            FormRow("Verry long label text may stretch across multiple lines") {
+            HFormRow("Verry long label text may stretch across multiple lines") {
                 TextField("value", text: .constant(""))
             }
             
-            FormRow("View without baseline", alignment: .top) {
+            HFormRow("View without baseline", alignment: .top) {
                 Color.gray.frame(height: 40)
             }
         }
