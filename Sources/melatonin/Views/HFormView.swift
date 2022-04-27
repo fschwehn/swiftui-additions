@@ -5,21 +5,19 @@ public struct HFormView<Content>: View where Content : View {
     private var configuration: HFormViewConfiguration
     
     public init(
-        rowSpacing: CGFloat? = 8,
+        rowSpacing: CGFloat? = nil,
         maxLabelWidth: CGFloat? = nil,
         maxValueWidth: CGFloat? = nil,
-        valueLabelsHidden: Bool = true,
+        valueLabelsHidden: Bool? = nil,
+        labelFont: Font? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.configuration = .init(
-            rowSpacing: rowSpacing,
-            label: .init(
-                maxWidth: maxLabelWidth
-            ),
-            value: .init(
-                maxWidth: maxValueWidth,
-                labelsHidden: valueLabelsHidden
-            )
+            rowSpacing: rowSpacing ?? HFormViewConfiguration.default.rowSpacing,
+            maxLabelWidth: maxLabelWidth ?? HFormViewConfiguration.default.maxLabelWidth,
+            maxValueWidth: maxValueWidth ?? HFormViewConfiguration.default.maxValueWidth,
+            labelFont: labelFont ?? HFormViewConfiguration.default.labelFont,
+            valueLabelsHidden: valueLabelsHidden ?? HFormViewConfiguration.default.valueLabelsHidden
         )
         self.content = content
     }
@@ -56,15 +54,16 @@ public struct HFormRow<Label, Value>: View where Label: View, Value: View {
         HStack(alignment: alignment, spacing: nil) {
             label()
                 .multilineTextAlignment(.trailing)
+                .font(configuration.labelFont)
                 .frame(
-                    maxWidth: configuration.label.maxWidth,
+                    maxWidth: configuration.maxLabelWidth,
                     alignment: .trailing
                 )
                 .alignmentGuide(.label, computeValue: { $0[.label] })
             value()
-                .labelsHidden(configuration.value.labelsHidden)
+                .labelsHidden(configuration.valueLabelsHidden)
                 .frame(
-                    maxWidth: configuration.value.maxWidth,
+                    maxWidth: configuration.maxValueWidth,
                     alignment: .leading
                 )
         }
@@ -84,25 +83,25 @@ public extension HFormRow where Label == Text {
 }
 
 fileprivate struct HFormViewConfiguration {
-    struct Label {
-        var maxWidth: CGFloat?
-    }
+    var rowSpacing: CGFloat
+    var maxLabelWidth: CGFloat?
+    var maxValueWidth: CGFloat?
+    var labelFont: Font
+    var valueLabelsHidden: Bool
     
-    struct Value {
-        var maxWidth: CGFloat?
-        var labelsHidden: Bool = true
-    }
-    
-    var rowSpacing: CGFloat?
-    var label: Label
-    var value: Value
+    static let `default` = Self(
+        rowSpacing: 12,
+        maxLabelWidth: nil,
+        maxValueWidth: nil,
+        labelFont: .system(size: 12, weight: .semibold, design: .default),
+        valueLabelsHidden: true
+    )
 }
 
 fileprivate struct HFormViewConfigurationKey: EnvironmentKey {
-    static let defaultValue = HFormViewConfiguration(
-        label: .init(),
-        value: .init()
-    )
+    static var defaultValue: HFormViewConfiguration {
+        HFormViewConfiguration.default
+    }
 }
 
 fileprivate extension EnvironmentValues {

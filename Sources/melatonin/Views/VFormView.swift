@@ -5,19 +5,19 @@ public struct VFormView<Content>: View where Content : View {
     private var configuration: VFormViewConfiguration
     
     public init(
-        alignment: HorizontalAlignment = .leading,
-        rowSpacing: CGFloat? = 20,
-        labelSpacing: CGFloat? = 8,
-        valueLabelsHidden: Bool = true,
-        labelFont: Font = .system(size: 12, weight: .semibold, design: .default),
+        alignment: HorizontalAlignment? = nil,
+        rowSpacing: CGFloat? = nil,
+        labelSpacing: CGFloat? = nil,
+        valueLabelsHidden: Bool? = nil,
+        labelFont: Font? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.configuration = .init(
-            alignment: alignment,
-            labelSpacing: labelSpacing,
-            rowSpacing: rowSpacing,
-            valueLabelsHidden: valueLabelsHidden,
-            labelFont: labelFont
+            alignment: alignment ?? VFormViewConfiguration.default.alignment,
+            rowSpacing: rowSpacing ?? VFormViewConfiguration.default.rowSpacing,
+            labelSpacing: labelSpacing ?? VFormViewConfiguration.default.labelSpacing,
+            valueLabelsHidden: valueLabelsHidden ?? VFormViewConfiguration.default.valueLabelsHidden,
+            labelFont: labelFont ?? VFormViewConfiguration.default.labelFont
         )
         self.content = content
     }
@@ -72,15 +72,25 @@ public extension VFormRow where Label == Text {
 }
 
 fileprivate struct VFormViewConfiguration {
-    var alignment: HorizontalAlignment = .leading
-    var labelSpacing: CGFloat? = nil
-    var rowSpacing: CGFloat? = nil
-    var valueLabelsHidden: Bool = true
-    var labelFont: Font = .system(size: 12, weight: .semibold, design: .default)
+    var alignment: HorizontalAlignment
+    var rowSpacing: CGFloat
+    var labelSpacing: CGFloat
+    var valueLabelsHidden: Bool
+    var labelFont: Font
+    
+    static let `default` = Self(
+        alignment: HorizontalAlignment.leading,
+        rowSpacing: 20,
+        labelSpacing: 8,
+        valueLabelsHidden: true,
+        labelFont: .system(size: 12, weight: .semibold, design: .default)
+    )
 }
 
 fileprivate struct VFormViewConfigurationKey: EnvironmentKey {
-    static let defaultValue = VFormViewConfiguration()
+    static var defaultValue: VFormViewConfiguration {
+        .default
+    }
 }
 
 fileprivate extension EnvironmentValues {
