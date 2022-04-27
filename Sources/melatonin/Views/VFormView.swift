@@ -5,37 +5,35 @@ public struct VFormView<Content>: View where Content : View {
     private var configuration: VFormViewConfiguration
     
     public init(
-        rowSpacing: CGFloat? = 8,
-        maxLabelWidth: CGFloat? = nil,
-        maxValueWidth: CGFloat? = nil,
+        alignment: HorizontalAlignment = .leading,
+        rowSpacing: CGFloat? = 20,
+        labelSpacing: CGFloat? = 8,
         valueLabelsHidden: Bool = true,
+        labelFont: Font = .system(size: 12, weight: .semibold, design: .default),
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.configuration = .init(
+            alignment: alignment,
+            labelSpacing: labelSpacing,
             rowSpacing: rowSpacing,
-            label: .init(
-                maxWidth: maxLabelWidth
-            ),
-            value: .init(
-                maxWidth: maxValueWidth,
-                labelsHidden: valueLabelsHidden
-            )
+            valueLabelsHidden: valueLabelsHidden,
+            labelFont: labelFont
         )
         self.content = content
     }
     
     public var body: some View {
         VStack(
-            alignment: .label,
+            alignment: configuration.alignment,
             spacing: configuration.rowSpacing,
             content: content
         )
+        .multilineTextAlignment(configuration.alignment.textAlignment)
         .environment(\.formViewConfiguration, configuration)
     }
 }
 
 public struct VFormRow<Label, Value>: View where Label: View, Value: View {
-    private var alignment: VerticalAlignment
     private var label: () -> Label
     private var value: () -> Value
     
@@ -43,30 +41,22 @@ public struct VFormRow<Label, Value>: View where Label: View, Value: View {
     private var configuration: VFormViewConfiguration
     
     public init(
-        alignment: VerticalAlignment = .firstTextBaseline,
         @ViewBuilder label: @escaping () -> Label,
         @ViewBuilder value: @escaping  () -> Value
     ) {
-        self.alignment = alignment
         self.label = label
         self.value = value
     }
     
     public var body: some View {
-        HStack(alignment: alignment, spacing: nil) {
+        VStack(
+            alignment: configuration.alignment,
+            spacing: configuration.labelSpacing
+        ) {
             label()
-                .multilineTextAlignment(.trailing)
-                .frame(
-                    maxWidth: configuration.label.maxWidth,
-                    alignment: .trailing
-                )
-                .alignmentGuide(.label, computeValue: { $0[.label] })
+                .font(configuration.labelFont)
             value()
-                .labelsHidden(configuration.value.labelsHidden)
-                .frame(
-                    maxWidth: configuration.value.maxWidth,
-                    alignment: .leading
-                )
+                .labelsHidden(configuration.valueLabelsHidden)
         }
     }
 }
@@ -74,35 +64,23 @@ public struct VFormRow<Label, Value>: View where Label: View, Value: View {
 public extension VFormRow where Label == Text {
     init(
         _ label: String,
-        alignment: VerticalAlignment = .firstTextBaseline,
         @ViewBuilder value: @escaping () -> Value
     ) {
-        self.alignment = alignment
         self.label = { Text(label) }
         self.value = value
     }
 }
 
 fileprivate struct VFormViewConfiguration {
-    struct Label {
-        var maxWidth: CGFloat?
-    }
-    
-    struct Value {
-        var maxWidth: CGFloat?
-        var labelsHidden: Bool = true
-    }
-    
-    var rowSpacing: CGFloat?
-    var label: Label
-    var value: Value
+    var alignment: HorizontalAlignment = .leading
+    var labelSpacing: CGFloat? = nil
+    var rowSpacing: CGFloat? = nil
+    var valueLabelsHidden: Bool = true
+    var labelFont: Font = .system(size: 12, weight: .semibold, design: .default)
 }
 
 fileprivate struct VFormViewConfigurationKey: EnvironmentKey {
-    static let defaultValue = VFormViewConfiguration(
-        label: .init(),
-        value: .init()
-    )
+    static let defaultValue = VFormViewConfiguration()
 }
 
 fileprivate extension EnvironmentValues {
@@ -126,9 +104,10 @@ fileprivate extension HorizontalAlignment {
 struct VFormView_Previews: PreviewProvider {
     static var previews: some View {
         VFormView(
-            rowSpacing: 8,
-            maxLabelWidth: 140,
-            maxValueWidth: 200
+            alignment: .leading,
+            rowSpacing: 20,
+            labelSpacing: 8,
+            valueLabelsHidden: true
         ) {
             VFormRow("Label One") {
                 TextField("value", text: .constant(""))
@@ -154,18 +133,15 @@ struct VFormView_Previews: PreviewProvider {
                 TextField("value", text: .constant(""))
             }
          
-            VFormRow("Toggle", alignment: .center) {
+            VFormRow("Toggle") {
                 Toggle(isOn: .constant(true), label: EmptyView.init)
             }
             
             VFormRow("Verry long label text may stretch across multiple lines") {
                 TextField("value", text: .constant(""))
             }
-            
-            VFormRow("View without baseline", alignment: .top) {
-                Color.gray.frame(height: 40)
-            }
         }
+        .frame(width: 240)
         .padding()
     }
 }
