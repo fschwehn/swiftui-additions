@@ -100,16 +100,6 @@ fileprivate extension EnvironmentValues {
     }
 }
 
-fileprivate extension HorizontalAlignment {
-    struct LabelAlignment: AlignmentID {
-        static func defaultValue(in d: ViewDimensions) -> CGFloat {
-            d[HorizontalAlignment.trailing]
-        }
-    }
-    
-    static let label = HorizontalAlignment(LabelAlignment.self)
-}
-
 #if DEBUG
 struct VFormView_Previews: PreviewProvider {
     static var previews: some View {
