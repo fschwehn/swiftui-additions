@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 public struct VerticalFormViewStyle: FormViewStyle {
@@ -47,3 +48,5 @@ public extension FormViewStyle where Self == VerticalFormViewStyle {
         VerticalFormViewStyle()
     }
 }
+
+#endif

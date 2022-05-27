@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 public struct HorizontalFormViewStyle: FormViewStyle {
@@ -64,3 +65,5 @@ fileprivate extension HorizontalAlignment {
     
     static let formViewValue = HorizontalAlignment(FormViewValueAlignment.self)
 }
+
+#endif

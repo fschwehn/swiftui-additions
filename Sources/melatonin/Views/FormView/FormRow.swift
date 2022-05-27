@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 public struct FormRow<Label, Value>: View where Label: View, Value: View {
@@ -64,4 +65,6 @@ struct FormRow_Previews: PreviewProvider {
         .previewLayout(.sizeThatFits)
     }
 }
+#endif
+
 #endif

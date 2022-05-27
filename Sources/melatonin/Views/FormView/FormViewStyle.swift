@@ -1,3 +1,4 @@
+#if os(macOS)
 import SwiftUI
 
 public protocol FormViewStyle {
@@ -30,3 +31,5 @@ public extension View {
         self.environment(\.formViewStyle, style)
     }
 }
+
+#endif
