@@ -38,6 +38,15 @@ public extension FormRow where Label == Text {
         self.label = { Text(label + ":") }
         self.value = value
     }
+    
+    init(
+        verticalAlignment: VerticalAlignment = .firstTextBaseline,
+        @ViewBuilder value: @escaping () -> Value
+    ) {
+        self.verticalAlignment = verticalAlignment
+        self.label = { Text("") }
+        self.value = value
+    }
 }
 
 #if DEBUG

@@ -23,11 +23,7 @@ public struct HorizontalFormViewStyle: FormViewStyle {
         content: @escaping () -> Content) -> AnyView where Content : View
     {
         AnyView(
-            VStack(
-                alignment: .formViewValue,
-                spacing: rowSpacing,
-                content: content
-            )
+            Grid(alignment: .leading, verticalSpacing: rowSpacing, content: content)
         )
     }
     
@@ -37,14 +33,14 @@ public struct HorizontalFormViewStyle: FormViewStyle {
         verticalAlignment: VerticalAlignment
     ) -> AnyView where Label : View, Value : View {
         AnyView(
-            HStack(alignment: verticalAlignment) {
+            GridRow(alignment: verticalAlignment) {
                 label()
+                    .gridColumnAlignment(.trailing)
                     .multilineTextAlignment(.trailing)
                     .frame(maxWidth: maxLabelWidth, alignment: .trailing)
                 value()
                     .labelsHidden(valueLabelsHidden)
                     .frame(maxWidth: maxValueWidth, alignment: .leading)
-                    .alignmentGuide(.formViewValue, computeValue: { $0[.leading] })
             }
         )
     }
@@ -54,16 +50,6 @@ public extension FormViewStyle where Self == HorizontalFormViewStyle {
     static var horizontal: FormViewStyle {
         HorizontalFormViewStyle()
     }
-}
-
-fileprivate extension HorizontalAlignment {
-    struct FormViewValueAlignment: AlignmentID {
-        static func defaultValue(in d: ViewDimensions) -> CGFloat {
-            d[HorizontalAlignment.leading]
-        }
-    }
-    
-    static let formViewValue = HorizontalAlignment(FormViewValueAlignment.self)
 }
 
 #endif

@@ -46,6 +46,8 @@ struct FormView_Previews: PreviewProvider {
                         .pickerStyle(.radioGroup)
                 }
                 
+                Divider()
+                
                 FormRow {
                     HStack(alignment: .firstTextBaseline, spacing: 4) {
                         Image(systemName: "exclamationmark.triangle.fill")
@@ -59,6 +61,8 @@ struct FormView_Previews: PreviewProvider {
                 FormRow("Toggle", verticalAlignment: .center) {
                     Toggle(isOn: .constant(true), label: EmptyView.init)
                 }
+
+                Divider()
                 
                 FormRow("Very long label text may stretch across multiple lines") {
                     TextField("value", text: .constant(""))
